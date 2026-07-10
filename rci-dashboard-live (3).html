@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Race Competitiveness Index</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap');
+
+  * { box-sizing: border-box; }
+  body {
+    background: #14161C; color: #E8E6E0; margin: 0; padding: 28px 24px;
+    font-family: 'Inter', sans-serif; min-height: 100vh;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+  h1 {
+    font-family: 'Fraunces', serif; font-size: 30px; font-weight: 600;
+    margin: 0; letter-spacing: -0.01em;
+  }
+  .subtitle { font-size: 13px; color: #63676F; margin-top: 4px; }
+  .banner {
+    margin: 16px 0 20px; padding: 10px 14px; background: #1D2129;
+    border-radius: 8px; border-left: 3px solid #D4A24C; font-size: 12px; color: #B8BAC0;
+  }
+  .banner strong { color: #D4A24C; }
+  .filters { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
+  .filter-btn {
+    padding: 6px 13px; border-radius: 6px; border: none; cursor: pointer;
+    background: #1D2129; color: #B8BAC0; font-family: 'Inter', sans-serif;
+    font-size: 12px; font-weight: 500;
+  }
+  .filter-btn.active { background: #D4A24C; color: #14161C; }
+  .divider { width: 1px; height: 20px; background: #262A33; margin: 0 4px; }
+  .controls-row { display: flex; gap: 10px; margin-bottom: 18px; align-items: center; }
+  .search-box {
+    display: flex; align-items: center; gap: 6px; background: #1D2129;
+    border-radius: 6px; padding: 6px 10px; flex: 1;
+  }
+  .search-box input {
+    background: transparent; border: none; outline: none; color: #E8E6E0;
+    font-family: 'Inter', sans-serif; font-size: 12px; width: 100%;
+  }
+  select {
+    background: #1D2129; color: #B8BAC0; border: none; border-radius: 6px;
+    padding: 7px 10px; font-family: 'Inter', sans-serif; font-size: 12px; cursor: pointer;
+  }
+  .col-headers {
+    display: grid; grid-template-columns: 18px 3px 1fr 90px 60px 130px 70px;
+    gap: 14px; padding: 0 16px 8px 16px; font-size: 10px; color: #4A4E57;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .list { background: #191C23; border-radius: 10px; overflow: hidden; border: 1px solid #262A33; }
+  .race-row-header {
+    display: grid; grid-template-columns: 18px 3px 1fr 90px 60px 130px 70px;
+    align-items: center; gap: 14px; padding: 13px 16px; cursor: pointer;
+    border-bottom: 1px solid #262A33; transition: background 0.15s;
+  }
+  .race-row-header:hover { background: #1A1E26; }
+  .chevron { color: #8B8F98; font-size: 11px; width: 15px; }
+  .party-bar { width: 3px; height: 22px; border-radius: 2px; }
+  .race-name { font-size: 14px; color: #E8E6E0; font-weight: 500; }
+  .race-office { font-size: 11px; color: #63676F; }
+  .rcv-tag { font-size: 10px; color: #8B8F98; margin-left: 7px; font-weight: 400; }
+  .tier-label { font-size: 11px; color: #8B8F98; }
+  .dots { display: flex; gap: 3px; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: #3A3E47; }
+  .dot.filled { background: #D4A24C; }
+  .comp-bar { display: flex; height: 10px; border-radius: 3px; overflow: hidden; width: 100%; }
+  .comp-seg { border-right: 1px solid #14161C; }
+  .comp-seg:last-child { border-right: none; }
+  .rci-score { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 600; text-align: right; }
+  .detail { padding: 4px 16px 20px 50px; background: #16191F; display: none; }
+  .detail.open { display: block; }
+  .detail-row {
+    display: grid; grid-template-columns: 150px 50px 1fr 220px; gap: 12px;
+    align-items: center; margin-bottom: 10px;
+  }
+  .detail-label { font-size: 12px; color: #B8BAC0; }
+  .detail-weight { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #63676F; }
+  .detail-bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .detail-bar-track { flex: 1; height: 5px; background: #262A33; border-radius: 3px; overflow: hidden; }
+  .detail-bar-fill { height: 100%; }
+  .detail-value { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #E8E6E0; width: 32px; }
+  .detail-note { font-size: 11px; color: #63676F; }
+  .coverage-note { margin-top: 4px; font-size: 11px; color: #63676F; }
+  .empty-state { padding: 40px; text-align: center; color: #63676F; font-size: 13px; }
+  .footer-note { margin-top: 16px; font-size: 11px; color: #4A4E57; }
+  .footer-note a { color: #8B8F98; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Race Competitiveness Index</h1>
+  <div class="subtitle" id="subtitleText">2026 midterms</div>
+  <div class="banner" id="bannerText">Loading live data...</div>
+
+  <div class="filters" id="officeFilters"></div>
+  <div class="filters" id="tierFilters" style="margin-bottom: 10px;"></div>
+
+  <div class="controls-row">
+    <div class="search-box">
+      <span style="color:#63676F;font-size:12px;">&#128269;</span>
+      <input type="text" id="searchInput" placeholder="Search state, district, or candidate name...">
+    </div>
+    <select id="sortSelect">
+      <option value="rci">Sort: RCI score</option>
+      <option value="alpha">Sort: Alphabetical</option>
+      <option value="coverage">Sort: Data coverage</option>
+    </select>
+  </div>
+
+  <div class="col-headers">
+    <div></div><div></div><div>Race</div><div>Tier</div><div>Conf.</div><div>Component Mix</div><div style="text-align:right;">RCI</div>
+  </div>
+
+  <div class="list" id="raceList"></div>
+  <div class="footer-note" id="footerNote">Fetching data...</div>
+</div>
+
+<script>
+// ---- CONFIG: paste your published Google Sheet CSV URL here ----
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8GZk1rozufBP2NdQv6_auFBRFZxhVyQbRbO2Laa_FggQ_ELqKsJyQOog4bR8JmxVgr1vevLoGwwNJ/pub?gid=1088096429&single=true&output=csv';
+
+const WEIGHTS = {
+  'Senate': { forecaster: 35, polling: 25, lean: 20, quality: 12, market: 8 },
+  'Governor': { forecaster: 35, polling: 25, lean: 20, quality: 12, market: 8 },
+  'House': { forecaster: 38, polling: 25, lean: 22, quality: 13, market: 0 },
+};
+
+let RACES = [];
+let expandedKey = null;
+let officeFilter = 'All';
+let tierFilter = 'All';
+let sortBy = 'rci';
+let query = '';
+
+function tierOf(rci) {
+  if (rci >= 8) return 'Battleground';
+  if (rci >= 6) return 'Competitive';
+  if (rci >= 3) return 'Leaning';
+  return 'Safe';
+}
+
+function heatColor(score) {
+  if (score === null || score === undefined || isNaN(score)) return '#3A3E47';
+  const t = Math.max(0, Math.min(1, score / 10));
+  const stops = [{ t: 0, c: [61, 90, 108] }, { t: 0.55, c: [212, 162, 76] }, { t: 1, c: [224, 86, 47] }];
+  let a = stops[0], b = stops[1];
+  for (let i = 0; i < stops.length - 1; i++) {
+    if (t >= stops[i].t && t <= stops[i + 1].t) { a = stops[i]; b = stops[i + 1]; break; }
+  }
+  const span = (b.t - a.t) || 1;
+  const lt = (t - a.t) / span;
+  const rgb = a.c.map((v, i) => Math.round(v + (b.c[i] - v) * lt));
+  return 'rgb(' + rgb.join(',') + ')';
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  return lines.slice(1).map(line => {
+    // basic CSV split handling simple quoted fields
+    const vals = line.match(/(".*?"|[^,]+|(?<=,)(?=,)|^(?=,))/g) || [];
+    const row = {};
+    headers.forEach((h, i) => {
+      let v = (vals[i] || '').trim().replace(/^"|"$/g, '');
+      row[h] = v;
+    });
+    return row;
+  });
+}
+
+function toNum(v) {
+  if (v === undefined || v === null || v === '' || v === 'null') return null;
+  const n = parseFloat(v);
+  return isNaN(n) ? null : n;
+}
+
+function buildComponents(row) {
+  const office = row.office;
+  const w = WEIGHTS[office] || WEIGHTS['House'];
+  const isRcv = row.is_rcv_state === 'true' || row.is_rcv_state === 'TRUE' || row.is_rcv_state === true;
+  const leanLabel = office === 'House' ? 'District Lean' : 'State Lean';
+  const comps = [
+    { label: 'Forecaster', weight: w.forecaster, score: toNum(row.forecaster_competitiveness) },
+    { label: 'Polling', weight: w.polling, score: toNum(row.polling_competitiveness), note: row.polling_data_confidence || '' },
+    { label: leanLabel, weight: isRcv ? 0 : w.lean, score: toNum(row.lean_competitiveness), note: isRcv ? 'Excluded — ranked-choice voting state' : '' },
+    { label: 'Candidate Quality', weight: w.quality, score: toNum(row.candidate_quality_competitiveness) },
+  ];
+  if (w.market > 0) {
+    comps.push({ label: 'Prediction Markets', weight: w.market, score: toNum(row.market_competitiveness) });
+  }
+  return comps;
+}
+
+async function loadData() {
+  try {
+    const res = await fetch(CSV_URL);
+    if (!res.ok) throw new Error('Fetch failed: ' + res.status);
+    const text = await res.text();
+    const rows = parseCSV(text);
+
+    RACES = rows.map(row => {
+      const rci = toNum(row.rci_score);
+      const coverage = toNum(row.weight_coverage) || 0;
+      return {
+        state: row.state,
+        office: row.office,
+        district: row.district && row.district !== 'null' ? row.district : null,
+        demNominee: row.dem_nominee || '',
+        repNominee: row.rep_nominee || '',
+        isRcv: row.is_rcv_state === 'true' || row.is_rcv_state === 'TRUE',
+        rci: rci,
+        weightCoverage: coverage,
+        confidence: Math.round(coverage * 5),
+        components: buildComponents(row),
+      };
+    }).filter(r => r.rci !== null);
+
+    document.getElementById('bannerText').innerHTML =
+      '<strong>Live data</strong> — ' + RACES.length + ' races loaded from BigQuery via Sheets export';
+    document.getElementById('subtitleText').textContent = '2026 midterms — updated ' + new Date().toLocaleString();
+    buildFilterButtons();
+    render();
+  } catch (e) {
+    document.getElementById('bannerText').innerHTML =
+      '<strong>Could not load live data.</strong> Check that CSV_URL is set correctly in this file. (' + e.message + ')';
+    document.getElementById('raceList').innerHTML = '<div class="empty-state">No data loaded.</div>';
+  }
+}
+
+function buildFilterButtons() {
+  const offices = ['All', 'Senate', 'House', 'Governor'];
+  document.getElementById('officeFilters').innerHTML = offices.map(o =>
+    '<button class="filter-btn ' + (officeFilter === o ? 'active' : '') + '" data-office="' + o + '">' + (o === 'All' ? 'All Offices' : o) + '</button>'
+  ).join('');
+  const tiers = ['All', 'Battleground', 'Competitive', 'Leaning', 'Safe'];
+  document.getElementById('tierFilters').innerHTML = tiers.map(t =>
+    '<button class="filter-btn ' + (tierFilter === t ? 'active' : '') + '" data-tier="' + t + '">' + (t === 'All' ? 'All Tiers' : t) + '</button>'
+  ).join('');
+
+  document.querySelectorAll('[data-office]').forEach(btn =>
+    btn.addEventListener('click', () => { officeFilter = btn.dataset.office; buildFilterButtons(); render(); })
+  );
+  document.querySelectorAll('[data-tier]').forEach(btn =>
+    btn.addEventListener('click', () => { tierFilter = btn.dataset.tier; buildFilterButtons(); render(); })
+  );
+}
+
+function render() {
+  let filtered = RACES.filter(r =>
+    (officeFilter === 'All' || r.office === officeFilter) &&
+    (tierFilter === 'All' || tierOf(r.rci) === tierFilter) &&
+    ((r.state + ' ' + (r.district || '') + ' ' + r.demNominee + ' ' + r.repNominee).toLowerCase().includes(query.toLowerCase()))
+  );
+  if (sortBy === 'rci') filtered.sort((a, b) => b.rci - a.rci);
+  if (sortBy === 'alpha') filtered.sort((a, b) => a.state.localeCompare(b.state));
+  if (sortBy === 'coverage') filtered.sort((a, b) => b.weightCoverage - a.weightCoverage);
+
+  const listEl = document.getElementById('raceList');
+  if (filtered.length === 0) {
+    listEl.innerHTML = '<div class="empty-state">No races match these filters.</div>';
+    document.getElementById('footerNote').textContent = '0 races shown.';
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(race => {
+    const key = race.state + '-' + race.office + '-' + race.district;
+    const label = race.district ? race.state + '-' + race.district : race.state;
+    const isOpen = expandedKey === key;
+    const totalW = race.components.reduce((s, c) => s + c.weight, 0) || 1;
+    const compBar = race.components.map(c =>
+      '<div class="comp-seg" style="width:' + (c.weight / totalW * 100) + '%;background:' + heatColor(c.score) + ';opacity:' + (c.score === null ? 0.25 : 1) + '" title="' + c.label + ': ' + (c.score !== null ? c.score.toFixed(1) : 'no data') + '"></div>'
+    ).join('');
+    const dots = [1, 2, 3, 4, 5].map(i =>
+      '<div class="dot' + (i <= race.confidence ? ' filled' : '') + '"></div>'
+    ).join('');
+    const detailRows = race.components.map(c =>
+      '<div class="detail-row">' +
+        '<div class="detail-label">' + c.label + '</div>' +
+        '<div class="detail-weight">' + c.weight + '%</div>' +
+        '<div class="detail-bar-wrap"><div class="detail-bar-track"><div class="detail-bar-fill" style="width:' + (c.score !== null ? c.score * 10 : 0) + '%;background:' + heatColor(c.score) + '"></div></div>' +
+        '<div class="detail-value">' + (c.score !== null ? c.score.toFixed(1) : '\u2014') + '</div></div>' +
+        '<div class="detail-note">' + (c.note || '') + '</div>' +
+      '</div>'
+    ).join('');
+
+    const matchup = (race.demNominee || race.repNominee)
+      ? '<span style="color:#5C7FB5">' + (race.demNominee || '?') + '</span> vs <span style="color:#B5605C">' + (race.repNominee || '?') + '</span>'
+      : '';
+
+    return (
+      '<div>' +
+        '<div class="race-row-header" data-key="' + key + '">' +
+          '<div class="chevron">' + (isOpen ? '\u25BE' : '\u25B8') + '</div>' +
+          '<div class="party-bar" style="background:#8B8F98"></div>' +
+          '<div><div class="race-name">' + label + (race.isRcv ? '<span class="rcv-tag">RCV</span>' : '') + '</div><div class="race-office">' + race.office + (matchup ? ' &middot; ' + matchup : '') + '</div></div>' +
+          '<div class="tier-label">' + tierOf(race.rci) + '</div>' +
+          '<div class="dots">' + dots + '</div>' +
+          '<div class="comp-bar">' + compBar + '</div>' +
+          '<div class="rci-score" style="color:' + heatColor(race.rci) + '">' + race.rci.toFixed(2) + '</div>' +
+        '</div>' +
+        '<div class="detail ' + (isOpen ? 'open' : '') + '">' +
+          detailRows +
+          '<div class="coverage-note">Weight coverage: ' + (race.weightCoverage * 100).toFixed(0) + '% of full methodology</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }).join('');
+
+  document.querySelectorAll('.race-row-header').forEach(el =>
+    el.addEventListener('click', () => {
+      const key = el.dataset.key;
+      expandedKey = expandedKey === key ? null : key;
+      render();
+    })
+  );
+
+  document.getElementById('footerNote').textContent = filtered.length + ' races shown, of ' + RACES.length + ' total loaded.';
+}
+
+document.getElementById('searchInput').addEventListener('input', e => { query = e.target.value; render(); });
+document.getElementById('sortSelect').addEventListener('change', e => { sortBy = e.target.value; render(); });
+
+loadData();
+</script>
+</body>
+</html>
