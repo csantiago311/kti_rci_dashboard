@@ -183,7 +183,7 @@ function tierOf(rci) {
 function heatColor(score) {
   if (score === null || score === undefined || isNaN(score)) return '#2A2A2A';
   const t = Math.max(0, Math.min(1, score / 10));
-  const stops = [{ t: 0, c: [130, 160, 180] }, { t: 0.55, c: [212, 162, 76] }, { t: 1, c: [224, 86, 47] }];
+  const stops = [{ t: 0, c: [110, 185, 230] }, { t: 0.55, c: [212, 162, 76] }, { t: 1, c: [224, 86, 47] }];
   let a = stops[0], b = stops[1];
   for (let i = 0; i < stops.length - 1; i++) {
     if (t >= stops[i].t && t <= stops[i + 1].t) { a = stops[i]; b = stops[i + 1]; break; }
