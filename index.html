@@ -9,13 +9,37 @@
 
   * { box-sizing: border-box; }
   body {
-    background: #14161C; color: #E8E6E0; margin: 0; padding: 28px 24px;
+    background:
+      radial-gradient(ellipse at 15% 0%, rgba(140,58,63,0.06), transparent 45%),
+      repeating-linear-gradient(0deg, rgba(232,230,224,0.015) 0px, rgba(232,230,224,0.015) 1px, transparent 1px, transparent 28px),
+      linear-gradient(160deg, #12141A 0%, #181B24 100%);
+    color: #E8E6E0; margin: 0; padding: 32px 24px;
     font-family: 'Inter', sans-serif; min-height: 100vh;
   }
   .wrap { max-width: 980px; margin: 0 auto; }
+
+  .masthead { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+  .kti-mark { width: 26px; height: 26px; flex-shrink: 0; }
+  .kti-wordmark {
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px;
+    letter-spacing: 0.01em; color: #E8E6E0;
+  }
+  .kti-tagline {
+    font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase; color: #6B6E76;
+  }
+  .masthead-rule { height: 1px; background: linear-gradient(90deg, #8C3A3F 0%, #262A33 40%); margin: 14px 0 20px; }
+
+  .section-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
   h1 {
-    font-family: 'Fraunces', serif; font-size: 30px; font-weight: 600;
-    margin: 0; letter-spacing: -0.01em;
+    font-family: 'Fraunces', serif; font-size: 28px; font-weight: 600; margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .tracker-pill {
+    font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase; color: #C98D91;
+    background: rgba(140,58,63,0.14); border: 1px solid rgba(140,58,63,0.35);
+    padding: 4px 9px; border-radius: 20px;
   }
   .subtitle { font-size: 13px; color: #63676F; margin-top: 4px; }
   .banner {
@@ -56,7 +80,9 @@
     border-bottom: 1px solid #262A33; transition: background 0.15s;
   }
   .race-row-header:hover { background: #1A1E26; }
-  .chevron { color: #8B8F98; font-size: 11px; width: 15px; }
+  .chevron { color: #8B8F98; width: 15px; display: flex; align-items: center; }
+  .chevron svg { width: 13px; height: 13px; transition: transform 0.15s; }
+  .chevron.open svg { transform: rotate(90deg); }
   .party-bar { width: 3px; height: 22px; border-radius: 2px; }
   .race-name { font-size: 14px; color: #E8E6E0; font-weight: 500; }
   .race-office { font-size: 11px; color: #63676F; }
@@ -90,7 +116,20 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>Race Competitiveness Index</h1>
+  <div class="masthead">
+    <svg class="kti-mark" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 13.5L10.5 19L21 6" stroke="#C98D91" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M4 22H18" stroke="#8C3A3F" stroke-width="2.4" stroke-linecap="round"/>
+    </svg>
+    <span class="kti-wordmark">KTI</span>
+    <span class="kti-tagline">Know the Issues</span>
+  </div>
+  <div class="masthead-rule"></div>
+
+  <div class="section-row">
+    <h1>Race Competitiveness Index</h1>
+    <span class="tracker-pill">Election Tracker</span>
+  </div>
   <div class="subtitle" id="subtitleText">2026 midterms</div>
   <div class="banner" id="bannerText">Loading live data...</div>
 
@@ -289,10 +328,12 @@ function render() {
       ? '<span style="color:#5C7FB5">' + (race.demNominee || '?') + '</span> vs <span style="color:#B5605C">' + (race.repNominee || '?') + '</span>'
       : '';
 
+    const chevronSvg = '<svg viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5L5 9L10.5 2.5" stroke="' + (isOpen ? '#C98D91' : '#8B8F98') + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
     return (
       '<div>' +
         '<div class="race-row-header" data-key="' + key + '">' +
-          '<div class="chevron">' + (isOpen ? '\u25BE' : '\u25B8') + '</div>' +
+          '<div class="chevron' + (isOpen ? ' open' : '') + '">' + chevronSvg + '</div>' +
           '<div class="party-bar" style="background:#8B8F98"></div>' +
           '<div><div class="race-name">' + label + (race.isRcv ? '<span class="rcv-tag">RCV</span>' : '') + '</div><div class="race-office">' + race.office + (matchup ? ' &middot; ' + matchup : '') + '</div></div>' +
           '<div class="tier-label">' + tierOf(race.rci) + '</div>' +
