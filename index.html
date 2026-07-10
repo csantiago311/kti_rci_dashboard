@@ -10,10 +10,10 @@
   * { box-sizing: border-box; }
   body {
     background:
-      radial-gradient(ellipse at 15% 0%, rgba(140,58,63,0.06), transparent 45%),
-      repeating-linear-gradient(0deg, rgba(232,230,224,0.015) 0px, rgba(232,230,224,0.015) 1px, transparent 1px, transparent 28px),
-      linear-gradient(160deg, #12141A 0%, #181B24 100%);
-    color: #E8E6E0; margin: 0; padding: 32px 24px;
+      radial-gradient(ellipse at 15% 0%, rgba(140,58,63,0.10), transparent 45%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 28px),
+      linear-gradient(160deg, #001f3f 0%, #001529 100%);
+    color: #FFFFFF; margin: 0; padding: 32px 24px;
     font-family: 'Inter', sans-serif; min-height: 100vh;
   }
   .wrap { max-width: 980px; margin: 0 auto; }
@@ -22,96 +22,96 @@
   .kti-mark { width: 26px; height: 26px; flex-shrink: 0; }
   .kti-wordmark {
     font-family: 'Fraunces', serif; font-weight: 600; font-size: 22px;
-    letter-spacing: 0.01em; color: #E8E6E0;
+    letter-spacing: 0.01em; color: #FFFFFF;
   }
   .kti-tagline {
     font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
-    letter-spacing: 0.14em; text-transform: uppercase; color: #6B6E76;
+    letter-spacing: 0.14em; text-transform: uppercase; color: #AAAAAA;
   }
-  .masthead-rule { height: 1px; background: linear-gradient(90deg, #8C3A3F 0%, #262A33 40%); margin: 14px 0 20px; }
+  .masthead-rule { height: 1px; background: linear-gradient(90deg, #8C3A3F 0%, #001529 40%); margin: 14px 0 20px; }
 
   .section-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
   h1 {
     font-family: 'Fraunces', serif; font-size: 28px; font-weight: 600; margin: 0;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.01em; color: #FFFFFF;
   }
   .tracker-pill {
     font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 600;
     letter-spacing: 0.08em; text-transform: uppercase; color: #C98D91;
-    background: rgba(140,58,63,0.14); border: 1px solid rgba(140,58,63,0.35);
+    background: rgba(140,58,63,0.18); border: 1px solid rgba(140,58,63,0.4);
     padding: 4px 9px; border-radius: 20px;
   }
-  .subtitle { font-size: 13px; color: #63676F; margin-top: 4px; }
+  .subtitle { font-size: 13px; color: #AAAAAA; margin-top: 4px; }
   .banner {
-    margin: 16px 0 20px; padding: 10px 14px; background: #1D2129;
-    border-radius: 8px; border-left: 3px solid #D4A24C; font-size: 12px; color: #B8BAC0;
+    margin: 16px 0 20px; padding: 10px 14px; background: #111111;
+    border-radius: 8px; border-left: 3px solid #D4A24C; font-size: 12px; color: #CCCCCC;
   }
   .banner strong { color: #D4A24C; }
   .filters { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
   .filter-btn {
     padding: 6px 13px; border-radius: 6px; border: none; cursor: pointer;
-    background: #1D2129; color: #B8BAC0; font-family: 'Inter', sans-serif;
+    background: #111111; color: #CCCCCC; font-family: 'Inter', sans-serif;
     font-size: 12px; font-weight: 500;
   }
   .filter-btn.active { background: #D4A24C; color: #14161C; }
-  .divider { width: 1px; height: 20px; background: #262A33; margin: 0 4px; }
+  .divider { width: 1px; height: 20px; background: #2A2A2A; margin: 0 4px; }
   .controls-row { display: flex; gap: 10px; margin-bottom: 18px; align-items: center; }
   .search-box {
-    display: flex; align-items: center; gap: 6px; background: #1D2129;
+    display: flex; align-items: center; gap: 6px; background: #111111;
     border-radius: 6px; padding: 6px 10px; flex: 1;
   }
   .search-box input {
-    background: transparent; border: none; outline: none; color: #E8E6E0;
+    background: transparent; border: none; outline: none; color: #FFFFFF;
     font-family: 'Inter', sans-serif; font-size: 12px; width: 100%;
   }
   select {
-    background: #1D2129; color: #B8BAC0; border: none; border-radius: 6px;
+    background: #111111; color: #CCCCCC; border: none; border-radius: 6px;
     padding: 7px 10px; font-family: 'Inter', sans-serif; font-size: 12px; cursor: pointer;
   }
   .col-headers {
     display: grid; grid-template-columns: 18px 3px 1fr 90px 60px 130px 70px;
-    gap: 14px; padding: 0 16px 8px 16px; font-size: 10px; color: #4A4E57;
+    gap: 14px; padding: 0 16px 8px 16px; font-size: 10px; color: #666666;
     text-transform: uppercase; letter-spacing: 0.05em;
   }
-  .list { background: #191C23; border-radius: 10px; overflow: hidden; border: 1px solid #262A33; }
+  .list { background: #111111; border-radius: 10px; overflow: hidden; border: 1px solid #2A2A2A; }
   .race-row-header {
     display: grid; grid-template-columns: 18px 3px 1fr 90px 60px 130px 70px;
     align-items: center; gap: 14px; padding: 13px 16px; cursor: pointer;
-    border-bottom: 1px solid #262A33; transition: background 0.15s;
+    border-bottom: 1px solid #2A2A2A; transition: background 0.15s;
   }
-  .race-row-header:hover { background: #1A1E26; }
-  .chevron { color: #8B8F98; width: 15px; display: flex; align-items: center; }
+  .race-row-header:hover { background: #1A1A1A; }
+  .chevron { color: #AAAAAA; width: 15px; display: flex; align-items: center; }
   .chevron svg { width: 13px; height: 13px; transition: transform 0.15s; }
   .chevron.open svg { transform: rotate(90deg); }
   .party-bar { width: 3px; height: 22px; border-radius: 2px; }
-  .race-name { font-size: 14px; color: #E8E6E0; font-weight: 500; }
-  .race-office { font-size: 11px; color: #63676F; }
-  .rcv-tag { font-size: 10px; color: #8B8F98; margin-left: 7px; font-weight: 400; }
-  .tier-label { font-size: 11px; color: #8B8F98; }
+  .race-name { font-size: 14px; color: #FFFFFF; font-weight: 500; }
+  .race-office { font-size: 11px; color: #999999; }
+  .rcv-tag { font-size: 10px; color: #AAAAAA; margin-left: 7px; font-weight: 400; }
+  .tier-label { font-size: 11px; color: #AAAAAA; }
   .dots { display: flex; gap: 3px; }
-  .dot { width: 5px; height: 5px; border-radius: 50%; background: #3A3E47; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: #2A2A2A; }
   .dot.filled { background: #D4A24C; }
   .comp-bar { display: flex; height: 10px; border-radius: 3px; overflow: hidden; width: 100%; }
   .comp-seg { border-right: 1px solid #14161C; }
   .comp-seg:last-child { border-right: none; }
   .rci-score { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 600; text-align: right; }
-  .detail { padding: 4px 16px 20px 50px; background: #16191F; display: none; }
+  .detail { padding: 4px 16px 20px 50px; background: #0D0D0D; display: none; }
   .detail.open { display: block; }
   .detail-row {
     display: grid; grid-template-columns: 150px 50px 1fr 220px; gap: 12px;
     align-items: center; margin-bottom: 10px;
   }
-  .detail-label { font-size: 12px; color: #B8BAC0; }
-  .detail-weight { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #63676F; }
+  .detail-label { font-size: 12px; color: #CCCCCC; }
+  .detail-weight { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #999999; }
   .detail-bar-wrap { display: flex; align-items: center; gap: 8px; }
-  .detail-bar-track { flex: 1; height: 5px; background: #262A33; border-radius: 3px; overflow: hidden; }
+  .detail-bar-track { flex: 1; height: 5px; background: #2A2A2A; border-radius: 3px; overflow: hidden; }
   .detail-bar-fill { height: 100%; }
-  .detail-value { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #E8E6E0; width: 32px; }
-  .detail-note { font-size: 11px; color: #63676F; }
-  .coverage-note { margin-top: 4px; font-size: 11px; color: #63676F; }
-  .empty-state { padding: 40px; text-align: center; color: #63676F; font-size: 13px; }
-  .footer-note { margin-top: 16px; font-size: 11px; color: #4A4E57; }
-  .footer-note a { color: #8B8F98; }
+  .detail-value { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #FFFFFF; width: 32px; }
+  .detail-note { font-size: 11px; color: #999999; }
+  .coverage-note { margin-top: 4px; font-size: 11px; color: #999999; }
+  .empty-state { padding: 40px; text-align: center; color: #999999; font-size: 13px; }
+  .footer-note { margin-top: 16px; font-size: 11px; color: #666666; }
+  .footer-note a { color: #AAAAAA; }
 </style>
 </head>
 <body>
@@ -138,7 +138,7 @@
 
   <div class="controls-row">
     <div class="search-box">
-      <span style="color:#63676F;font-size:12px;">&#128269;</span>
+      <span style="color:#999999;font-size:12px;">&#128269;</span>
       <input type="text" id="searchInput" placeholder="Search state, district, or candidate name...">
     </div>
     <select id="sortSelect">
@@ -181,7 +181,7 @@ function tierOf(rci) {
 }
 
 function heatColor(score) {
-  if (score === null || score === undefined || isNaN(score)) return '#3A3E47';
+  if (score === null || score === undefined || isNaN(score)) return '#2A2A2A';
   const t = Math.max(0, Math.min(1, score / 10));
   const stops = [{ t: 0, c: [61, 90, 108] }, { t: 0.55, c: [212, 162, 76] }, { t: 1, c: [224, 86, 47] }];
   let a = stops[0], b = stops[1];
@@ -328,13 +328,13 @@ function render() {
       ? '<span style="color:#5C7FB5">' + (race.demNominee || '?') + '</span> vs <span style="color:#B5605C">' + (race.repNominee || '?') + '</span>'
       : '';
 
-    const chevronSvg = '<svg viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5L5 9L10.5 2.5" stroke="' + (isOpen ? '#C98D91' : '#8B8F98') + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    const chevronSvg = '<svg viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5L5 9L10.5 2.5" stroke="' + (isOpen ? '#C98D91' : '#AAAAAA') + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
     return (
       '<div>' +
         '<div class="race-row-header" data-key="' + key + '">' +
           '<div class="chevron' + (isOpen ? ' open' : '') + '">' + chevronSvg + '</div>' +
-          '<div class="party-bar" style="background:#8B8F98"></div>' +
+          '<div class="party-bar" style="background:#AAAAAA"></div>' +
           '<div><div class="race-name">' + label + (race.isRcv ? '<span class="rcv-tag">RCV</span>' : '') + '</div><div class="race-office">' + race.office + (matchup ? ' &middot; ' + matchup : '') + '</div></div>' +
           '<div class="tier-label">' + tierOf(race.rci) + '</div>' +
           '<div class="dots">' + dots + '</div>' +
