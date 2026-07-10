@@ -112,6 +112,29 @@
   .empty-state { padding: 40px; text-align: center; color: #999999; font-size: 13px; }
   .footer-note { margin-top: 16px; font-size: 11px; color: #666666; }
   .footer-note a { color: #AAAAAA; }
+
+  .methodology-card {
+    background: #111111; border-radius: 10px; border: 1px solid #2A2A2A;
+    margin-top: 14px; overflow: hidden;
+  }
+  .methodology-header {
+    display: flex; align-items: center; gap: 12px; padding: 13px 16px;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .methodology-header:hover { background: #1A1A1A; }
+  .methodology-title {
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+    color: #FFFFFF; letter-spacing: 0.01em;
+  }
+  .methodology-body {
+    max-height: 0; overflow: hidden; transition: max-height 0.25s ease, padding 0.25s ease;
+    padding: 0 16px;
+  }
+  .methodology-body.open { max-height: 500px; padding: 0 16px 18px 16px; }
+  .methodology-body p {
+    font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.65;
+    color: #CCCCCC; margin: 0; padding-left: 27px;
+  }
 </style>
 </head>
 <body>
@@ -153,6 +176,19 @@
   </div>
 
   <div class="list" id="raceList"></div>
+
+  <div class="methodology-card" id="methodologyCard">
+    <div class="methodology-header" id="methodologyToggle">
+      <div class="chevron" id="methodologyChevron">
+        <svg viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5L5 9L10.5 2.5" stroke="#AAAAAA" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <span class="methodology-title">Methodology</span>
+    </div>
+    <div class="methodology-body" id="methodologyBody">
+      <p>The Race Competitiveness Index (RCI) is KTI's answer to a simple but surprisingly hard question: how close is this race, really? Rather than leaning on any single source — a poll that might be an outlier, a pundit's gut read, or a betting market that only a handful of traders are actually pricing — the RCI blends five distinct signals into one 0-to-10 score, weighted by how much each one has historically mattered: the consensus view of professional election forecasters, the actual polling (adjusted for how reliable and recent each pollster's numbers tend to be), how the state or district has voted in the past relative to the current national mood, the strength and funding of the actual candidates on the ballot, and what prediction markets are willing to bet on. A 10 means a genuine toss-up; a 1 means the outcome is effectively settled. When one of those five signals is missing or too thin to trust, the model doesn't fake it — it leans harder on whatever data is solid, rather than pretending every race has been measured with equal precision. The result isn't a prediction of who wins, but a disciplined, transparent measure of how contested a race actually is — built the way a serious campaign analyst would size up a race by hand, just applied consistently across every seat in play.</p>
+    </div>
+  </div>
+
   <div class="footer-note" id="footerNote">Fetching data...</div>
 </div>
 
@@ -368,6 +404,13 @@ function render() {
 
 document.getElementById('searchInput').addEventListener('input', e => { query = e.target.value; render(); });
 document.getElementById('sortSelect').addEventListener('change', e => { sortBy = e.target.value; render(); });
+
+document.getElementById('methodologyToggle').addEventListener('click', () => {
+  const body = document.getElementById('methodologyBody');
+  const chevron = document.getElementById('methodologyChevron');
+  const isOpen = body.classList.toggle('open');
+  chevron.classList.toggle('open', isOpen);
+});
 
 loadData();
 </script>
