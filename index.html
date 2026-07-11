@@ -363,8 +363,7 @@ async function loadData() {
       };
     }).filter(r => r.rci !== null);
 
-    document.getElementById('bannerText').innerHTML =
-      '<strong>Live data</strong> — ' + RACES.length + ' races loaded from BigQuery via Sheets export';
+    document.getElementById('bannerText').innerHTML = '<strong>Live data</strong>';
     document.getElementById('subtitleText').textContent = '2026 midterms — updated ' + new Date().toLocaleString();
     buildFilterButtons();
     render();
@@ -409,6 +408,7 @@ function render() {
   if (filtered.length === 0) {
     listEl.innerHTML = '<div class="empty-state">No races match these filters.</div>';
     document.getElementById('footerNote').textContent = '0 races shown.';
+    document.getElementById('bannerText').innerHTML = '<strong>Live data</strong> — ' + RACES.length + ' races loaded (0 displayed)';
     return;
   }
 
@@ -494,6 +494,8 @@ function render() {
   );
 
   document.getElementById('footerNote').textContent = filtered.length + ' races shown, of ' + RACES.length + ' total loaded.';
+  document.getElementById('bannerText').innerHTML = '<strong>Live data</strong> — ' + RACES.length + ' races loaded' +
+    (filtered.length < RACES.length ? ' (' + filtered.length + ' displayed)' : '');
 }
 
 document.getElementById('searchInput').addEventListener('input', e => { query = e.target.value; render(); });
