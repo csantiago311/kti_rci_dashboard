@@ -296,6 +296,7 @@ async function loadData() {
         district: row.district && row.district !== 'null' ? row.district : null,
         demNominee: row.dem_nominee || '',
         repNominee: row.rep_nominee || '',
+        incumbentParty: row.incumbent_party || '',
         isRcv: row.is_rcv_state === 'true' || row.is_rcv_state === 'TRUE',
         rci: rci,
         weightCoverage: coverage,
@@ -372,8 +373,10 @@ function render() {
       '</div>'
     ).join('');
 
+    const isDemIncumbent = race.incumbentParty && race.incumbentParty.toUpperCase().indexOf('DEMOCRATIC') !== -1;
+    const isRepIncumbent = race.incumbentParty && race.incumbentParty.toUpperCase().indexOf('REPUBLICAN') !== -1;
     const matchup = (race.demNominee || race.repNominee)
-      ? '<span style="color:#5C7FB5">' + (race.demNominee || '?') + '</span> vs <span style="color:#DC6E5F">' + (race.repNominee || '?') + '</span>'
+      ? '<span style="color:#5C7FB5">' + (race.demNominee || '?') + (isDemIncumbent ? ' <span style="color:#8B8F98;font-weight:400;">(I)</span>' : '') + '</span> vs <span style="color:#DC6E5F">' + (race.repNominee || '?') + (isRepIncumbent ? ' <span style="color:#8B8F98;font-weight:400;">(I)</span>' : '') + '</span>'
       : '';
 
     const chevronSvg = '<svg viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5L5 9L10.5 2.5" stroke="' + (isOpen ? '#C98D91' : '#AAAAAA') + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
