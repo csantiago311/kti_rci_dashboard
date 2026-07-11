@@ -56,6 +56,12 @@
   .filter-btn.active { background: #D4A24C; color: #14161C; }
   .divider { width: 1px; height: 20px; background: #2A2A2A; margin: 0 4px; }
   .controls-row { display: flex; gap: 10px; margin-bottom: 18px; align-items: center; }
+  .bias-toggle-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; padding: 8px 12px; background: #0D0D0D; border-radius: 6px; border: 1px solid #2A2A2A; }
+  .bias-toggle-label { font-family: 'Inter', sans-serif; font-size: 12px; color: #AAAAAA; font-weight: 500; }
+  .bias-toggle-group { display: flex; background: #111111; border-radius: 6px; padding: 2px; }
+  .bias-toggle-btn { padding: 5px 12px; border-radius: 5px; border: none; cursor: pointer; background: transparent; color: #999999; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; }
+  .bias-toggle-btn.active { background: #8C3A3F; color: #FFFFFF; }
+  .bias-toggle-hint { font-family: 'Inter', sans-serif; font-size: 11px; color: #666666; font-style: italic; }
   .search-box {
     display: flex; align-items: center; gap: 6px; background: #111111;
     border-radius: 6px; padding: 6px 10px; flex: 1;
@@ -161,6 +167,15 @@
   <div class="filters" id="officeFilters"></div>
   <div class="filters" id="tierFilters" style="margin-bottom: 10px;"></div>
 
+  <div class="bias-toggle-row">
+    <span class="bias-toggle-label">Polling data:</span>
+    <div class="bias-toggle-group" id="biasToggle">
+      <button class="bias-toggle-btn active" data-mode="raw">Raw</button>
+      <button class="bias-toggle-btn" data-mode="adjusted">Bias-Adjusted</button>
+    </div>
+    <span class="bias-toggle-hint">Corrects for each pollster's known historical lean before scoring</span>
+  </div>
+
   <div class="controls-row">
     <div class="search-box">
       <span style="color:#999999;font-size:12px;">&#128269;</span>
@@ -213,6 +228,7 @@ let expandedKey = null;
 let officeFilter = 'All';
 let tierFilter = 'All';
 let sortBy = 'rci';
+let biasMode = 'raw'; // 'raw' or 'adjusted'
 let query = '';
 
 function tierOf(rci) {
@@ -270,7 +286,7 @@ function buildComponents(row) {
   const leanLabel = office === 'House' ? 'District Lean' : 'State Lean';
   const comps = [
     { label: 'Forecaster', weight: w.forecaster, score: toNum(row.forecaster_competitiveness) },
-    { label: 'Polling', weight: w.polling, score: toNum(row.polling_competitiveness), note: row.polling_data_confidence || '' },
+    { label: 'Polling', weight: w.polling, score: toNum(row.polling_competitiveness), scoreAdjusted: toNum(row.polling_competitiveness_adjusted), note: row.polling_data_confidence || '' },
     { label: leanLabel, weight: isRcv ? 0 : w.lean, score: toNum(row.lean_competitiveness), note: isRcv ? 'Excluded — ranked-choice voting state' : '' },
     { label: 'Candidate Quality', weight: w.quality, score: toNum(row.candidate_quality_competitiveness) },
   ];
@@ -289,6 +305,7 @@ async function loadData() {
 
     RACES = rows.map(row => {
       const rci = toNum(row.rci_score);
+      const rciAdjusted = toNum(row.rci_score_adjusted);
       const coverage = toNum(row.weight_coverage) || 0;
       return {
         state: row.state,
@@ -299,6 +316,7 @@ async function loadData() {
         incumbentParty: row.incumbent_party || '',
         isRcv: row.is_rcv_state === 'true' || row.is_rcv_state === 'TRUE',
         rci: rci,
+        rciAdjusted: rciAdjusted,
         weightCoverage: coverage,
         confidence: Math.round(coverage * 5),
         components: buildComponents(row),
@@ -336,12 +354,14 @@ function buildFilterButtons() {
 }
 
 function render() {
+  const getRci = (r) => biasMode === 'adjusted' && r.rciAdjusted !== null ? r.rciAdjusted : r.rci;
+
   let filtered = RACES.filter(r =>
     (officeFilter === 'All' || r.office === officeFilter) &&
-    (tierFilter === 'All' || tierOf(r.rci) === tierFilter) &&
+    (tierFilter === 'All' || tierOf(getRci(r)) === tierFilter) &&
     ((r.state + ' ' + (r.district || '') + ' ' + r.demNominee + ' ' + r.repNominee).toLowerCase().includes(query.toLowerCase()))
   );
-  if (sortBy === 'rci') filtered.sort((a, b) => b.rci - a.rci);
+  if (sortBy === 'rci') filtered.sort((a, b) => getRci(b) - getRci(a));
   if (sortBy === 'alpha') filtered.sort((a, b) => a.state.localeCompare(b.state));
   if (sortBy === 'coverage') filtered.sort((a, b) => b.weightCoverage - a.weightCoverage);
 
@@ -356,22 +376,27 @@ function render() {
     const key = race.state + '-' + race.office + '-' + race.district;
     const label = race.district ? race.state + '-' + race.district : race.state;
     const isOpen = expandedKey === key;
+    const displayRci = getRci(race);
     const totalW = race.components.reduce((s, c) => s + c.weight, 0) || 1;
-    const compBar = race.components.map(c =>
-      '<div class="comp-seg" style="width:' + (c.weight / totalW * 100) + '%;background:' + heatColor(c.score) + ';opacity:' + (c.score === null ? 0.25 : 1) + '" title="' + c.label + ': ' + (c.score !== null ? c.score.toFixed(1) : 'no data') + '"></div>'
-    ).join('');
+    const compBar = race.components.map(c => {
+      const cScore = (biasMode === 'adjusted' && c.scoreAdjusted !== undefined && c.scoreAdjusted !== null) ? c.scoreAdjusted : c.score;
+      return '<div class="comp-seg" style="width:' + (c.weight / totalW * 100) + '%;background:' + heatColor(cScore) + ';opacity:' + (cScore === null ? 0.25 : 1) + '" title="' + c.label + ': ' + (cScore !== null ? cScore.toFixed(1) : 'no data') + '"></div>';
+    }).join('');
     const dots = [1, 2, 3, 4, 5].map(i =>
       '<div class="dot' + (i <= race.confidence ? ' filled' : '') + '"></div>'
     ).join('');
-    const detailRows = race.components.map(c =>
-      '<div class="detail-row">' +
+    const detailRows = race.components.map(c => {
+      const cScore = (biasMode === 'adjusted' && c.scoreAdjusted !== undefined && c.scoreAdjusted !== null) ? c.scoreAdjusted : c.score;
+      const adjustedNote = (c.scoreAdjusted !== undefined && c.scoreAdjusted !== null && c.scoreAdjusted !== c.score)
+        ? ' <span style="color:#C98D91;">(raw: ' + (c.score !== null ? c.score.toFixed(1) : '\u2014') + ')</span>' : '';
+      return '<div class="detail-row">' +
         '<div class="detail-label">' + c.label + '</div>' +
         '<div class="detail-weight">' + c.weight + '%</div>' +
-        '<div class="detail-bar-wrap"><div class="detail-bar-track"><div class="detail-bar-fill" style="width:' + (c.score !== null ? c.score * 10 : 0) + '%;background:' + heatColor(c.score) + '"></div></div>' +
-        '<div class="detail-value">' + (c.score !== null ? c.score.toFixed(1) : '\u2014') + '</div></div>' +
-        '<div class="detail-note">' + (c.note || '') + '</div>' +
-      '</div>'
-    ).join('');
+        '<div class="detail-bar-wrap"><div class="detail-bar-track"><div class="detail-bar-fill" style="width:' + (cScore !== null ? cScore * 10 : 0) + '%;background:' + heatColor(cScore) + '"></div></div>' +
+        '<div class="detail-value">' + (cScore !== null ? cScore.toFixed(1) : '\u2014') + '</div></div>' +
+        '<div class="detail-note">' + (c.note || '') + adjustedNote + '</div>' +
+      '</div>';
+    }).join('');
 
     const isDemIncumbent = race.incumbentParty && race.incumbentParty.toUpperCase().indexOf('DEMOCRATIC') !== -1;
     const isRepIncumbent = race.incumbentParty && race.incumbentParty.toUpperCase().indexOf('REPUBLICAN') !== -1;
@@ -387,10 +412,10 @@ function render() {
           '<div class="chevron' + (isOpen ? ' open' : '') + '">' + chevronSvg + '</div>' +
           '<div class="party-bar" style="background:#AAAAAA"></div>' +
           '<div><div class="race-name">' + label + (race.isRcv ? '<span class="rcv-tag">RCV</span>' : '') + '</div><div class="race-office">' + race.office + (matchup ? ' &middot; ' + matchup : '') + '</div></div>' +
-          '<div class="tier-label">' + tierOf(race.rci) + '</div>' +
+          '<div class="tier-label">' + tierOf(displayRci) + '</div>' +
           '<div class="dots">' + dots + '</div>' +
           '<div class="comp-bar">' + compBar + '</div>' +
-          '<div class="rci-score" style="color:' + heatColor(race.rci) + '">' + race.rci.toFixed(2) + '</div>' +
+          '<div class="rci-score" style="color:' + heatColor(displayRci) + '">' + displayRci.toFixed(2) + '</div>' +
         '</div>' +
         '<div class="detail ' + (isOpen ? 'open' : '') + '">' +
           detailRows +
@@ -413,6 +438,14 @@ function render() {
 
 document.getElementById('searchInput').addEventListener('input', e => { query = e.target.value; render(); });
 document.getElementById('sortSelect').addEventListener('change', e => { sortBy = e.target.value; render(); });
+
+document.querySelectorAll('.bias-toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    biasMode = btn.dataset.mode;
+    document.querySelectorAll('.bias-toggle-btn').forEach(b => b.classList.toggle('active', b === btn));
+    render();
+  });
+});
 
 document.getElementById('methodologyToggle').addEventListener('click', () => {
   const body = document.getElementById('methodologyBody');
