@@ -98,6 +98,10 @@
   .race-name { font-size: 14px; color: #FFFFFF; font-weight: 500; }
   .race-office { font-size: 11px; color: #999999; }
   .rcv-tag { font-size: 10px; color: #AAAAAA; margin-left: 7px; font-weight: 400; }
+  .party-control-tag { font-size: 11px; margin-left: 6px; font-weight: 600; }
+  .party-control-tag.dem { color: #5C7FB5; }
+  .party-control-tag.rep { color: #DC6E5F; }
+  .party-control-tag.ind { color: #AAAAAA; }
   .tier-label { font-size: 11px; color: #AAAAAA; }
   .dots { display: flex; gap: 3px; }
   .dot { width: 5px; height: 5px; border-radius: 50%; background: #2A2A2A; }
@@ -242,6 +246,34 @@ function tierOf(rci) {
   return 'Safe';
 }
 
+// Only meaningful for Leaning/Safe races — a Battleground/Competitive
+// race by definition doesn't have a clear "party in control." Tries the
+// actual polling comparison first (top_choice_pct is always the Dem
+// nominee's number, second_choice_pct always the Rep's, per the party-
+// based bucketing built earlier), falling back to the incumbent's party
+// when no polling data exists — common for genuinely safe seats that
+// don't attract pollster attention. Returns null if neither is available,
+// rather than guessing.
+function partyControlOf(race, mode) {
+  const tier = tierOf(mode === 'adjusted' && race.rciAdjusted !== null ? race.rciAdjusted : race.rci);
+  if (tier !== 'Leaning' && tier !== 'Safe') return null;
+
+  const top = (mode === 'adjusted' && race.topChoicePctAdjusted !== null) ? race.topChoicePctAdjusted : race.topChoicePct;
+  const second = (mode === 'adjusted' && race.secondChoicePctAdjusted !== null) ? race.secondChoicePctAdjusted : race.secondChoicePct;
+  if (top !== null && second !== null) {
+    return top > second ? 'D' : 'R';
+  }
+
+  if (race.incumbentParty) {
+    const p = race.incumbentParty.toUpperCase();
+    if (p.indexOf('DEMOCRATIC') !== -1) return 'D';
+    if (p.indexOf('REPUBLICAN') !== -1) return 'R';
+    if (p.indexOf('INDEPENDENT') !== -1) return 'Ind';
+  }
+
+  return null;
+}
+
 function heatColor(score) {
   if (score === null || score === undefined || isNaN(score)) return '#2A2A2A';
   const t = Math.max(0, Math.min(1, score / 10));
@@ -321,6 +353,10 @@ async function loadData() {
         isRcv: row.is_rcv_state === 'true' || row.is_rcv_state === 'TRUE',
         rci: rci,
         rciAdjusted: rciAdjusted,
+        topChoicePct: toNum(row.top_choice_pct),
+        secondChoicePct: toNum(row.second_choice_pct),
+        topChoicePctAdjusted: toNum(row.top_choice_pct_adjusted),
+        secondChoicePctAdjusted: toNum(row.second_choice_pct_adjusted),
         weightCoverage: coverage,
         confidence: Math.round(coverage * 5),
         components: buildComponents(row),
@@ -381,6 +417,10 @@ function render() {
     const label = race.district ? race.state + '-' + race.district : race.state;
     const isOpen = expandedKey === key;
     const displayRci = getRci(race);
+    const partyControl = partyControlOf(race, biasMode);
+    const partyTagHtml = partyControl
+      ? '<span class="party-control-tag ' + (partyControl === 'D' ? 'dem' : partyControl === 'R' ? 'rep' : 'ind') + '">(' + partyControl + ')</span>'
+      : '';
     const totalW = race.components.reduce((s, c) => s + c.weight, 0) || 1;
     const compBar = race.components.map(c => {
       const cScore = (biasMode === 'adjusted' && c.scoreAdjusted !== undefined && c.scoreAdjusted !== null) ? c.scoreAdjusted : c.score;
@@ -421,7 +461,7 @@ function render() {
         '<div class="race-row-header" data-key="' + key + '">' +
           '<div class="chevron' + (isOpen ? ' open' : '') + '">' + chevronSvg + '</div>' +
           '<div class="party-bar" style="background:#AAAAAA"></div>' +
-          '<div><div class="race-name">' + label + (race.isRcv ? '<span class="rcv-tag">RCV</span>' : '') + '</div><div class="race-office">' + race.office + (matchup ? ' &middot; ' + matchup : '') + '</div></div>' +
+          '<div><div class="race-name">' + label + (race.isRcv ? '<span class="rcv-tag">RCV</span>' : '') + partyTagHtml + '</div><div class="race-office">' + race.office + (matchup ? ' &middot; ' + matchup : '') + '</div></div>' +
           '<div class="tier-label">' + tierOf(displayRci) + '</div>' +
           '<div class="dots">' + dots + '</div>' +
           '<div class="comp-bar">' + compBar + '</div>' +
