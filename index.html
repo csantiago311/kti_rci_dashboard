@@ -242,7 +242,7 @@ let query = '';
 function tierOf(rci) {
   if (rci >= 8) return 'Battleground';
   if (rci >= 6) return 'Competitive';
-  if (rci >= 3) return 'Leaning';
+  if (rci >= 3) return 'Lean';
   return 'Safe';
 }
 
@@ -256,7 +256,7 @@ function tierOf(rci) {
 // rather than guessing.
 function partyControlOf(race, mode) {
   const tier = tierOf(mode === 'adjusted' && race.rciAdjusted !== null ? race.rciAdjusted : race.rci);
-  if (tier !== 'Leaning' && tier !== 'Safe') return null;
+  if (tier !== 'Lean' && tier !== 'Safe') return null;
 
   const top = (mode === 'adjusted' && race.topChoicePctAdjusted !== null) ? race.topChoicePctAdjusted : race.topChoicePct;
   const second = (mode === 'adjusted' && race.secondChoicePctAdjusted !== null) ? race.secondChoicePctAdjusted : race.secondChoicePct;
@@ -380,7 +380,7 @@ function buildFilterButtons() {
   document.getElementById('officeFilters').innerHTML = offices.map(o =>
     '<button class="filter-btn ' + (officeFilter === o ? 'active' : '') + '" data-office="' + o + '">' + (o === 'All' ? 'All Offices' : o) + '</button>'
   ).join('');
-  const tiers = ['All', 'Battleground', 'Competitive', 'Leaning', 'Safe'];
+  const tiers = ['All', 'Battleground', 'Competitive', 'Lean', 'Safe'];
   document.getElementById('tierFilters').innerHTML = tiers.map(t =>
     '<button class="filter-btn ' + (tierFilter === t ? 'active' : '') + '" data-tier="' + t + '">' + (t === 'All' ? 'All Tiers' : t) + '</button>'
   ).join('');
