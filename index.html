@@ -461,8 +461,8 @@ function render() {
         '<div class="race-row-header" data-key="' + key + '">' +
           '<div class="chevron' + (isOpen ? ' open' : '') + '">' + chevronSvg + '</div>' +
           '<div class="party-bar" style="background:#AAAAAA"></div>' +
-          '<div><div class="race-name">' + label + (race.isRcv ? '<span class="rcv-tag">RCV</span>' : '') + partyTagHtml + '</div><div class="race-office">' + race.office + (matchup ? ' &middot; ' + matchup : '') + '</div></div>' +
-          '<div class="tier-label">' + tierOf(displayRci) + '</div>' +
+          '<div><div class="race-name">' + label + (race.isRcv ? '<span class="rcv-tag">RCV</span>' : '') + '</div><div class="race-office">' + race.office + (matchup ? ' &middot; ' + matchup : '') + '</div></div>' +
+          '<div class="tier-label">' + tierOf(displayRci) + partyTagHtml + '</div>' +
           '<div class="dots">' + dots + '</div>' +
           '<div class="comp-bar">' + compBar + '</div>' +
           '<div class="rci-score" style="color:' + heatColor(displayRci) + '">' + displayRci.toFixed(2) + '</div>' +
