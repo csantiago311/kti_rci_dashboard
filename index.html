@@ -62,6 +62,9 @@
   .bias-toggle-btn { padding: 5px 12px; border-radius: 5px; border: none; cursor: pointer; background: transparent; color: #999999; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; }
   .bias-toggle-btn.active { background: #8C3A3F; color: #FFFFFF; }
   .bias-toggle-hint { font-family: 'Inter', sans-serif; font-size: 11px; color: #666666; font-style: italic; }
+  .mini-toggle { display: inline-flex; background: #111111; border-radius: 4px; padding: 1px; margin-left: 8px; vertical-align: middle; }
+  .mini-toggle-btn { padding: 2px 7px; border-radius: 3px; border: none; cursor: pointer; background: transparent; color: #666666; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 500; }
+  .mini-toggle-btn.active { background: #8C3A3F; color: #FFFFFF; }
   .search-box {
     display: flex; align-items: center; gap: 6px; background: #111111;
     border-radius: 6px; padding: 6px 10px; flex: 1;
@@ -225,6 +228,7 @@ const WEIGHTS = {
 
 let RACES = [];
 let expandedKey = null;
+let detailPollingMode = null; // null = follow global biasMode; 'raw' or 'adjusted' = local override for the currently expanded race
 let officeFilter = 'All';
 let tierFilter = 'All';
 let sortBy = 'rci';
@@ -385,16 +389,22 @@ function render() {
     const dots = [1, 2, 3, 4, 5].map(i =>
       '<div class="dot' + (i <= race.confidence ? ' filled' : '') + '"></div>'
     ).join('');
-    const detailRows = race.components.map(c => {
-      const cScore = (biasMode === 'adjusted' && c.scoreAdjusted !== undefined && c.scoreAdjusted !== null) ? c.scoreAdjusted : c.score;
-      const adjustedNote = (c.scoreAdjusted !== undefined && c.scoreAdjusted !== null && c.scoreAdjusted !== c.score)
-        ? ' <span style="color:#C98D91;">(raw: ' + (c.score !== null ? c.score.toFixed(1) : '\u2014') + ')</span>' : '';
+    const effectiveMode = detailPollingMode || biasMode;
+    const detailRows = race.components.map((c, idx) => {
+      const hasAdjusted = c.scoreAdjusted !== undefined && c.scoreAdjusted !== null;
+      const cScore = (effectiveMode === 'adjusted' && hasAdjusted) ? c.scoreAdjusted : c.score;
+      const miniToggle = hasAdjusted ? (
+        '<div class="mini-toggle" data-comp-idx="' + idx + '">' +
+          '<button class="mini-toggle-btn' + (effectiveMode === 'raw' ? ' active' : '') + '" data-mode="raw">Raw</button>' +
+          '<button class="mini-toggle-btn' + (effectiveMode === 'adjusted' ? ' active' : '') + '" data-mode="adjusted">Adj</button>' +
+        '</div>'
+      ) : '';
       return '<div class="detail-row">' +
-        '<div class="detail-label">' + c.label + '</div>' +
+        '<div class="detail-label">' + c.label + miniToggle + '</div>' +
         '<div class="detail-weight">' + c.weight + '%</div>' +
         '<div class="detail-bar-wrap"><div class="detail-bar-track"><div class="detail-bar-fill" style="width:' + (cScore !== null ? cScore * 10 : 0) + '%;background:' + heatColor(cScore) + '"></div></div>' +
         '<div class="detail-value">' + (cScore !== null ? cScore.toFixed(1) : '\u2014') + '</div></div>' +
-        '<div class="detail-note">' + (c.note || '') + adjustedNote + '</div>' +
+        '<div class="detail-note">' + (c.note || '') + '</div>' +
       '</div>';
     }).join('');
 
@@ -428,7 +438,17 @@ function render() {
   document.querySelectorAll('.race-row-header').forEach(el =>
     el.addEventListener('click', () => {
       const key = el.dataset.key;
-      expandedKey = expandedKey === key ? null : key;
+      const wasThisOpen = expandedKey === key;
+      expandedKey = wasThisOpen ? null : key;
+      detailPollingMode = null; // reset override — each newly-expanded race starts following the global toggle
+      render();
+    })
+  );
+
+  document.querySelectorAll('.mini-toggle-btn').forEach(btn =>
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation(); // don't let this click also collapse the detail view
+      detailPollingMode = btn.dataset.mode;
       render();
     })
   );
