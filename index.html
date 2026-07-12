@@ -320,10 +320,15 @@ function buildComponents(row) {
   const w = WEIGHTS[office] || WEIGHTS['House'];
   const isRcv = row.is_rcv_state === 'true' || row.is_rcv_state === 'TRUE' || row.is_rcv_state === true;
   const leanLabel = office === 'House' ? 'District Lean' : 'State Lean';
+  const REDISTRICTED_STATES = ['California', 'Missouri', 'North Carolina', 'Ohio', 'Texas', 'Utah'];
+  const isRedistricted = office === 'House' && REDISTRICTED_STATES.indexOf(row.state) !== -1;
+  const leanNote = isRcv
+    ? 'Excluded — ranked-choice voting state'
+    : (isRedistricted ? 'Caveat: this state has a new 2026 map — historical district data may not match current boundaries' : '');
   const comps = [
     { label: 'Forecaster', weight: w.forecaster, score: toNum(row.forecaster_competitiveness) },
     { label: 'Polling', weight: w.polling, score: toNum(row.polling_competitiveness), scoreAdjusted: toNum(row.polling_competitiveness_adjusted), note: row.polling_data_confidence || '' },
-    { label: leanLabel, weight: isRcv ? 0 : w.lean, score: toNum(row.lean_competitiveness), note: isRcv ? 'Excluded — ranked-choice voting state' : '' },
+    { label: leanLabel, weight: isRcv ? 0 : w.lean, score: toNum(row.lean_competitiveness), note: leanNote },
     { label: 'Candidate Quality', weight: w.quality, score: toNum(row.candidate_quality_competitiveness) },
   ];
   if (w.market > 0) {
