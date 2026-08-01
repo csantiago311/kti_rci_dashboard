@@ -47,6 +47,23 @@
     border-radius: 8px; border-left: 3px solid #D4A24C; font-size: 12px; color: #CCCCCC;
   }
   .banner strong { color: #D4A24C; }
+
+  /* Sticky controls block: office/tier filters, bias toggle, search/sort,
+     and column headers all stay pinned together while scrolling through
+     the race list. Solid background needed since content scrolls
+     underneath it -- the body's gradient can't show through here or it'd
+     look broken. */
+  .sticky-controls {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #001529;
+    padding-top: 16px;
+    padding-bottom: 10px;
+    margin-bottom: 4px;
+    box-shadow: 0 8px 16px -8px rgba(0,0,0,0.4);
+  }
+
   .filters { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
   .filter-btn {
     padding: 6px 13px; border-radius: 6px; border: none; cursor: pointer;
@@ -168,32 +185,34 @@
   <div class="subtitle" id="subtitleText">2026 midterms</div>
   <div class="banner" id="bannerText">Loading live data...</div>
 
-  <div class="filters" id="officeFilters"></div>
-  <div class="filters" id="tierFilters" style="margin-bottom: 10px;"></div>
+  <div class="sticky-controls">
+    <div class="filters" id="officeFilters"></div>
+    <div class="filters" id="tierFilters" style="margin-bottom: 10px;"></div>
 
-  <div class="bias-toggle-row">
-    <span class="bias-toggle-label">Polling data:</span>
-    <div class="bias-toggle-group" id="biasToggle">
-      <button class="bias-toggle-btn active" data-mode="raw">Raw</button>
-      <button class="bias-toggle-btn" data-mode="adjusted">Bias-Adjusted</button>
+    <div class="bias-toggle-row">
+      <span class="bias-toggle-label">Polling data:</span>
+      <div class="bias-toggle-group" id="biasToggle">
+        <button class="bias-toggle-btn active" data-mode="raw">Raw</button>
+        <button class="bias-toggle-btn" data-mode="adjusted">Bias-Adjusted</button>
+      </div>
+      <span class="bias-toggle-hint">Corrects for each pollster's known historical lean before scoring</span>
     </div>
-    <span class="bias-toggle-hint">Corrects for each pollster's known historical lean before scoring</span>
-  </div>
 
-  <div class="controls-row">
-    <div class="search-box">
-      <span style="color:#999999;font-size:12px;">&#128269;</span>
-      <input type="text" id="searchInput" placeholder="Search state, district, or candidate name...">
+    <div class="controls-row">
+      <div class="search-box">
+        <span style="color:#999999;font-size:12px;">&#128269;</span>
+        <input type="text" id="searchInput" placeholder="Search state, district, or candidate name...">
+      </div>
+      <select id="sortSelect">
+        <option value="rci">Sort: RCI score</option>
+        <option value="alpha">Sort: Alphabetical</option>
+        <option value="coverage">Sort: Data coverage</option>
+      </select>
     </div>
-    <select id="sortSelect">
-      <option value="rci">Sort: RCI score</option>
-      <option value="alpha">Sort: Alphabetical</option>
-      <option value="coverage">Sort: Data coverage</option>
-    </select>
-  </div>
 
-  <div class="col-headers">
-    <div></div><div></div><div>Race</div><div>Tier</div><div>Conf.</div><div>Component Mix</div><div style="text-align:right;">RCI</div>
+    <div class="col-headers">
+      <div></div><div></div><div>Race</div><div>Tier</div><div>Conf.</div><div>Component Mix</div><div style="text-align:right;">RCI</div>
+    </div>
   </div>
 
   <div class="list" id="raceList"></div>
@@ -232,7 +251,7 @@ let expandedKey = null;
 let officeFilter = 'All';
 let tierFilter = 'All';
 let sortBy = 'rci';
-let biasMode = 'raw'; // 'raw' or 'adjusted' — single source of truth for the whole page
+let biasMode = 'raw'; // 'raw' or 'adjusted' -- single source of truth for the whole page
 let query = '';
 
 function tierOf(rci) {
@@ -242,14 +261,6 @@ function tierOf(rci) {
   return 'Safe';
 }
 
-// Only meaningful for Leaning/Safe races — a Battleground/Competitive
-// race by definition doesn't have a clear "party in control." Tries the
-// actual polling comparison first (top_choice_pct is always the Dem
-// nominee's number, second_choice_pct always the Rep's, per the party-
-// based bucketing built earlier), falling back to the incumbent's party
-// when no polling data exists — common for genuinely safe seats that
-// don't attract pollster attention. Returns null if neither is available,
-// rather than guessing.
 function partyControlOf(race, mode) {
   const tier = tierOf(mode === 'adjusted' && race.rciAdjusted !== null ? race.rciAdjusted : race.rci);
   if (tier !== 'Lean' && tier !== 'Safe') return null;
@@ -274,11 +285,11 @@ function heatColor(score) {
   if (score === null || score === undefined || isNaN(score)) return '#2A2A2A';
   const t = Math.max(0, Math.min(1, score / 10));
   const stops = [
-    { t: 0.0, c: [110, 185, 230] },  // coldest — sky blue
-    { t: 0.25, c: [100, 175, 155] }, // cool teal
-    { t: 0.5, c: [175, 175, 110] },  // neutral olive-yellow
-    { t: 0.75, c: [212, 155, 80] },  // warm amber
-    { t: 1.0, c: [224, 86, 47] },    // hottest — red-orange
+    { t: 0.0, c: [110, 185, 230] },
+    { t: 0.25, c: [100, 175, 155] },
+    { t: 0.5, c: [175, 175, 110] },
+    { t: 0.75, c: [212, 155, 80] },
+    { t: 1.0, c: [224, 86, 47] },
   ];
   let a = stops[0], b = stops[1];
   for (let i = 0; i < stops.length - 1; i++) {
@@ -294,7 +305,6 @@ function parseCSV(text) {
   const lines = text.trim().split('\n');
   const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
   return lines.slice(1).map(line => {
-    // basic CSV split handling simple quoted fields
     const vals = line.match(/(".*?"|[^,]+|(?<=,)(?=,)|^(?=,))/g) || [];
     const row = {};
     headers.forEach((h, i) => {
@@ -430,9 +440,6 @@ function render() {
     const dots = [1, 2, 3, 4, 5].map(i =>
       '<div class="dot' + (i <= race.confidence ? ' filled' : '') + '"></div>'
     ).join('');
-    // Detail panel now always follows the single global biasMode toggle —
-    // no per-component override, so the headline score and the detail
-    // breakdown can never show contradictory values.
     const detailRows = race.components.map((c, idx) => {
       const hasAdjusted = c.scoreAdjusted !== undefined && c.scoreAdjusted !== null;
       const cScore = (biasMode === 'adjusted' && hasAdjusted) ? c.scoreAdjusted : c.score;
