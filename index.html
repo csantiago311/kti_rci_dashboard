@@ -164,6 +164,53 @@
     font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.65;
     color: #CCCCCC; margin: 0; padding-left: 27px;
   }
+
+  /* ===== MOBILE ===== */
+  @media (max-width: 640px) {
+    body { padding: 20px 14px; }
+
+    .col-headers, .race-row-header {
+      grid-template-columns: 16px 3px 1fr 52px 52px;
+      gap: 8px;
+    }
+    /* Drop Conf. and Component Mix on mobile -- exact numbers are still
+       available by tapping a race open; not worth the squeeze here. */
+    .col-headers > div:nth-child(5),
+    .col-headers > div:nth-child(6),
+    .dots,
+    .comp-bar {
+      display: none;
+    }
+
+    .race-name { font-size: 13px; }
+    .race-office {
+      font-size: 10.5px;
+      white-space: normal;
+      overflow-wrap: break-word;
+      line-height: 1.4;
+    }
+    .tier-label { font-size: 10px; white-space: nowrap; }
+    .rci-score { font-size: 15px; }
+
+    .detail { padding: 4px 12px 16px 12px; }
+    .detail-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      grid-template-areas: "label weight" "bar bar" "note note";
+      gap: 4px 8px;
+      margin-bottom: 16px;
+    }
+    .detail-label { grid-area: label; }
+    .detail-weight { grid-area: weight; text-align: right; }
+    .detail-bar-wrap { grid-area: bar; }
+    .detail-note { grid-area: note; font-size: 10.5px; }
+
+    .sticky-controls { padding-top: 10px; }
+    .bias-toggle-row { flex-wrap: wrap; }
+    .bias-toggle-hint { flex-basis: 100%; }
+    .controls-row { flex-wrap: wrap; }
+    select { width: 100%; }
+  }
 </style>
 </head>
 <body>
