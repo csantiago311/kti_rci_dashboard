@@ -314,7 +314,11 @@ function partyControlOf(race, mode) {
 
   const top = (mode === 'adjusted' && race.topChoicePctAdjusted !== null) ? race.topChoicePctAdjusted : race.topChoicePct;
   const second = (mode === 'adjusted' && race.secondChoicePctAdjusted !== null) ? race.secondChoicePctAdjusted : race.secondChoicePct;
-  if (top !== null && second !== null) {
+  // Senate races with an independent order their two poll numbers by FEC receipts,
+  // not Democrat-first, so the poll leader can't be read as D/R here. Fall back to
+  // the incumbent's party instead (display-only, Oct 2026).
+  const skipPollLeader = race.office === 'Senate' && !!race.indNominee;
+  if (!skipPollLeader && top !== null && second !== null) {
     return top > second ? 'D' : 'R';
   }
 
@@ -407,6 +411,7 @@ async function loadData() {
         district: row.district && row.district !== 'null' ? row.district : null,
         demNominee: row.dem_nominee || '',
         repNominee: row.rep_nominee || '',
+        indNominee: row.ind_nominee || '',
         incumbentParty: row.incumbent_party || '',
         isRcv: row.is_rcv_state === 'true' || row.is_rcv_state === 'TRUE',
         rci: rci,
@@ -456,7 +461,7 @@ function render() {
   let filtered = RACES.filter(r =>
     (officeFilter === 'All' || r.office === officeFilter) &&
     (tierFilter === 'All' || tierOf(getRci(r)) === tierFilter) &&
-    ((r.state + ' ' + (r.district || '') + ' ' + r.demNominee + ' ' + r.repNominee).toLowerCase().includes(query.toLowerCase()))
+    ((r.state + ' ' + (r.district || '') + ' ' + r.demNominee + ' ' + r.repNominee + ' ' + r.indNominee).toLowerCase().includes(query.toLowerCase()))
   );
   if (sortBy === 'rci') filtered.sort((a, b) => getRci(b) - getRci(a));
   if (sortBy === 'alpha') filtered.sort((a, b) => a.state.localeCompare(b.state));
@@ -501,9 +506,19 @@ function render() {
 
     const isDemIncumbent = race.incumbentParty && race.incumbentParty.toUpperCase().indexOf('DEMOCRATIC') !== -1;
     const isRepIncumbent = race.incumbentParty && race.incumbentParty.toUpperCase().indexOf('REPUBLICAN') !== -1;
-    const matchup = (race.demNominee || race.repNominee)
-      ? '<span style="color:#5C7FB5">' + (race.demNominee || '?') + (isDemIncumbent ? ' <span style="color:#8B8F98;font-weight:400;">(I)</span>' : '') + '</span> vs <span style="color:#DC6E5F">' + (race.repNominee || '?') + (isRepIncumbent ? ' <span style="color:#8B8F98;font-weight:400;">(I)</span>' : '') + '</span>'
-      : '';
+    const incTag = ' <span style="color:#8B8F98;font-weight:400;">(I)</span>';
+    let matchup = '';
+    if (race.indNominee) {
+      // Races with an independent: list the candidates that exist (no '?'),
+      // Democrat, Republican, then the independent in neutral grey.
+      const parts = [];
+      if (race.demNominee) parts.push('<span style="color:#5C7FB5">' + race.demNominee + (isDemIncumbent ? incTag : '') + '</span>');
+      if (race.repNominee) parts.push('<span style="color:#DC6E5F">' + race.repNominee + (isRepIncumbent ? incTag : '') + '</span>');
+      parts.push('<span style="color:#AAAAAA">' + race.indNominee + '</span>');
+      matchup = parts.join(' vs ');
+    } else if (race.demNominee || race.repNominee) {
+      matchup = '<span style="color:#5C7FB5">' + (race.demNominee || '?') + (isDemIncumbent ? incTag : '') + '</span> vs <span style="color:#DC6E5F">' + (race.repNominee || '?') + (isRepIncumbent ? incTag : '') + '</span>';
+    }
 
     const chevronSvg = '<svg viewBox="0 0 13 13" fill="none"><path d="M2.5 6.5L5 9L10.5 2.5" stroke="' + (isOpen ? '#C98D91' : '#AAAAAA') + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
