@@ -291,7 +291,7 @@ const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT8GZk1rozufBP2
 const WEIGHTS = {
   'Senate': { forecaster: 35, polling: 25, lean: 20, quality: 12, market: 8 },
   'Governor': { forecaster: 35, polling: 25, lean: 20, quality: 12, market: 8 },
-  'House': { forecaster: 35, polling: 25, lean: 20, quality: 13, market: 8 },
+  'House': { forecaster: 38, polling: 25, lean: 20, quality: 13, market: 8 },
 };
 
 let RACES = [];
@@ -378,7 +378,7 @@ function buildComponents(row) {
   const w = WEIGHTS[office] || WEIGHTS['House'];
   const isRcv = row.is_rcv_state === 'true' || row.is_rcv_state === 'TRUE' || row.is_rcv_state === true;
   const leanLabel = office === 'House' ? 'District Lean' : 'State Lean';
-  const REDISTRICTED_STATES = ['California', 'Missouri', 'North Carolina', 'Ohio', 'Texas', 'Utah'];
+  const REDISTRICTED_STATES = ['Alabama', 'California', 'Florida', 'Louisiana', 'North Carolina', 'Ohio', 'Tennessee', 'Texas', 'Utah'];
   const isRedistricted = office === 'House' && REDISTRICTED_STATES.indexOf(row.state) !== -1;
   const leanNote = isRcv
     ? 'Excluded — ranked-choice voting state'
